@@ -17,6 +17,13 @@ import java.util.List;
  * @author amendrashrestha
  */
 public class Experiment {
+    /**
+     * This is main class
+     * @param args
+     * @throws IOException
+     * @throws SQLException
+     * @throws ParseException 
+     */
 
     public static void main(String args[]) throws IOException, SQLException, ParseException {
         Experiment init = new Experiment();

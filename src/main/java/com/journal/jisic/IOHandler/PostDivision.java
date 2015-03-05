@@ -17,6 +17,10 @@ public class PostDivision {
 
     public static List<Alias> divideUserIntoTwoRand(int divisionFlag, List<Alias> aliasList, User tempUser)
             throws FileNotFoundException, IOException {
+        
+        /**
+         * Thsi is testing
+         */
 
         Alias aliasA = new Alias();
         Alias aliasB = new Alias();

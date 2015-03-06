@@ -2,6 +2,7 @@ package com.journal.jisic.view;
 
 import com.journal.jisic.IOHandler.IOReadWrite;
 import com.journal.jisic.IOHandler.PostDivision;
+import com.journal.jisic.controller.AnalyzeStyloFV;
 import com.journal.jisic.controller.AnalyzeTimeFV;
 import com.journal.jisic.controller.AnalyzeTimeStyloFV;
 import com.journal.jisic.model.Alias;
@@ -27,9 +28,9 @@ public class Experiment {
 
     public static void main(String args[]) throws IOException, SQLException, ParseException {
         Experiment init = new Experiment();
-        init.TimeExperiment();
+//        init.TimeExperiment();
         
-//        init.TimeStyloExperiment();
+        init.TimeStyloExperiment();
     }
 
     private void TimeExperiment() throws IOException, SQLException, ParseException {
@@ -55,12 +56,36 @@ public class Experiment {
             compare.executeUserCompare(splitUsersList);
         }
     }
+    
+    private void StyloExperiment() throws SQLException, ParseException, IOException {
+        List<User> userList = IOReadWrite.getAllUsersAsObject();
+
+        //For passing limited number of sorted users  
+        List<User> tempUsers = IOReadWrite.returnLimitedSortedUser(userList, 200);
+        List<Alias> splitUsersList;
+        int divisionTimes;
+
+        for (int k = 0; k < tempUsers.size(); k++) {
+            splitUsersList = new ArrayList<>();
+            for (int j = 0; j < tempUsers.size(); j++) {
+                if (k == j) {
+                    divisionTimes = 2;
+                } else {
+                    divisionTimes = 1;
+                }
+                User user = tempUsers.get(j);
+                splitUsersList = PostDivision.divideUserIntoTwoRand(divisionTimes, splitUsersList, user);
+            }
+            AnalyzeStyloFV compare = new AnalyzeStyloFV();
+            compare.executeUserCompare(splitUsersList);
+        }
+    }
 
     private void TimeStyloExperiment() throws SQLException, ParseException, IOException {
         List<User> userList = IOReadWrite.getAllUsersAsObject();
 
         //For passing limited number of sorted users  
-        List<User> tempUsers = IOReadWrite.returnLimitedSortedUser(userList, 10);
+        List<User> tempUsers = IOReadWrite.returnLimitedSortedUser(userList, 200);
         List<Alias> splitUsersList;
         int divisionTimes;
 

@@ -68,6 +68,7 @@ public class StylometryAnalysis {
      */
     public ArrayList<Float> countFunctionWords(List<String> words, int wordSize) {
         ArrayList<Float> tmpCounter = new ArrayList<>(Collections.nCopies(functionWords.size(), 0.0f));	// Initialize to zero
+        int funWordCount = 0;
         for (String word1 : words) {
             String word = word1.toLowerCase();
             if (functionWords.contains(word)) {
@@ -75,15 +76,24 @@ public class StylometryAnalysis {
                 float value = tmpCounter.get(place);
                 value++;
                 tmpCounter.set(place, value);
+                funWordCount++;
             }
         }
-        // "Normalize" the values by dividing with length of the post (nr of words in the post)
+       
+        // "Normalize" the values by dividing with total number of function words
         for (int i = 0; i < tmpCounter.size(); i++) {
             Float wordCount = tmpCounter.get(i);
+            
             if (wordCount != 0) {
-                tmpCounter.set(i, wordCount / (float) wordSize);
+                tmpCounter.set(i, wordCount / (float) funWordCount);
             }
         }
+//        float sum = 0.0f;
+//        for(Float a : tmpCounter){
+//            sum += a;
+//        }
+//        System.out.println("Sum: " + sum);
+        
 //        System.out.println("Function Words: " + tmpCounter);
         return tmpCounter;
     }
@@ -96,7 +106,7 @@ public class StylometryAnalysis {
      * @return
      */
     public ArrayList<Float> countSmiley(List<String> words, int wordSize) {
-        String[] ch = {":\')", ":-)", ";-)", ":P", ":D", ":X", "<3", ":)", ";)", ":@", ":*", ":|", ":$", "%)"};
+        String[] ch = {":\')", ":-)", ";-)", ":p", ":d", ":X", "<3", ":)", ";)", ":@", ":*", ":|", ":$", "%)"};
         ArrayList<Float> tmpCounter = new ArrayList<>(Collections.nCopies(ch.length, 0.0f));	// Initialize to zero
 
         for (int i = 0; i < ch.length; i++) {
@@ -106,88 +116,21 @@ public class StylometryAnalysis {
             tmpCounter.set(i, (float) value);
         }
 
+        float smilyCount = 0.0f;
+        for(Float smily : tmpCounter){
+            smilyCount = smily + smilyCount;
+        }
+        
+//        System.out.println(smilyCount);
+        
         for (int j = 0; j < tmpCounter.size(); j++) {
-            tmpCounter.set(j, (tmpCounter.get(j) / (float) wordSize));
+            tmpCounter.set(j, (tmpCounter.get(j) / smilyCount));
         }
 //        System.out.println("Smiley: " + tmpCounter);
 
         return tmpCounter;
     }
-
-    /**
-     * Calculate the count of Hashtags in post
-     *
-     * @param post
-     * @param wordSize
-     * @return
-     */
-    public ArrayList<Float> countHashTags(String post, int wordSize) {
-        post = post.toLowerCase();
-        ArrayList<Float> tmpCounter = new ArrayList<>(Collections.nCopies(1, 0.0f)); // Initialize to zero
-//        float wordCount = extractWords(post).size();
-
-        String hashStr = "(?:\\s|\\A)[#]+([A-Za-z0-9-_]+)";
-        Pattern hPattern = Pattern.compile(hashStr);
-        Matcher m = hPattern.matcher(post);
-
-        int i = 0;
-        while (m.find()) {
-            i++;
-        }
-        tmpCounter.set(0, (i / (float) wordSize));
-//        System.out.println("HashTags Words: " + tmpCounter);
-        return tmpCounter;
-    }
-
-    /**
-     * Calculate the count of URLs in post
-     *
-     * @param post
-     * @param wordSize
-     * @return
-     */
-    public ArrayList<Float> countURLs(String post, int wordSize) {
-        ArrayList<Float> tmpCounter = new ArrayList<>(Collections.nCopies(1, 0.0f));	// Initialize to zero
-//        float wordCount = extractWords(post).size();
-
-        String urlPattern = "((https?|ftp|gopher|telnet|file|Unsure|http):((//)|"
-                + "(\\\\))+[\\w\\d:#@%/;$()~_?\\+-=\\\\\\.&]*)";
-        Pattern uPattern = Pattern.compile(urlPattern, Pattern.CASE_INSENSITIVE);
-        Matcher m = uPattern.matcher(post);
-
-        int i = 0;
-        while (m.find()) {
-            i++;
-        }
-        tmpCounter.set(0, (i / (float) wordSize));
-//        System.out.println("URLs Words: " + tmpCounter);
-        return tmpCounter;
-    }
-
-    /**
-     * Calculate the count of mention in post
-     *
-     * @param post
-     * @param wordSize
-     * @return
-     */
-    public ArrayList<Float> countMention(String post, int wordSize) {
-        ArrayList<Float> tmpCounter = new ArrayList<>(Collections.nCopies(1, 0.0f));	// Initialize to zero
-//        float wordCount = extractWords(post).size();
-
-        String mentionStr = "(?:\\s|\\A)[@]+([A-Za-z0-9-_]+)";
-        Pattern mPattern = Pattern.compile(mentionStr);
-        Matcher m = mPattern.matcher(post);
-
-        int i = 0;
-        while (m.find()) {
-            i++;
-        }
-        tmpCounter.set(0, (i / (float) wordSize));
-//        System.out.println("Mentions Words: " + tmpCounter);
-        return tmpCounter;
-    }
-
+    
     /**
      * Create a list containing the number of occurrences of letters a to z in
      * the text
@@ -295,7 +238,8 @@ public class StylometryAnalysis {
         int count = 0;
 
         for (String haystack1 : haystack) {
-            if (haystack1.equals(needle)) {
+            String newHaystack = haystack1.toLowerCase();
+            if (newHaystack.equals(needle)) {
                 count++;
             }
         }

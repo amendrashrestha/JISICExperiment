@@ -422,7 +422,7 @@ public class User {
             for (Posts posts : user.getUserPost()) {
                 String date = posts.getDate();
                 int DayOfMonth = getDayOfMonth(date) - 1;
-                System.out.println("Day Of Week " + DayOfMonth);
+//                System.out.println("Day Of Week " + DayOfMonth);
                 userDayOfMonthVector[DayOfMonth] = userDayOfMonthVector[DayOfMonth] + 1;
             }
             user.setClassifiedDayOfMonthVector(userDayOfMonthVector);

@@ -362,7 +362,7 @@ public class IOReadWrite {
 //            System.out.println("Emotion Words: " + placeafterSPCInFeatureVector);
             ArrayList<Float> smilies = stylo.countSmiley(wordsInPost, WordInPostSize);
             alias.addToFeatureVectorPostList(smilies, placeafterSPCInFeatureVector, cnt);
-            int size = smilies.size() + placeafterSPCInFeatureVector;
+//            int size = smilies.size() + placeafterSPCInFeatureVector;
 //            System.out.println("FV Size: " + size);
 
             cnt++;
@@ -520,7 +520,7 @@ public class IOReadWrite {
 
     public static String filterPost(String post) {
 
-        String urlPattern = "((https?|ftp|gopher|telnet|file|Unsure|http):((//)|"
+        /*String urlPattern = "((https?|ftp|gopher|telnet|file|Unsure|http):((//)|"
                 + "(\\\\))+[\\w\\d:#@%/;$()~_?\\+-=\\\\\\.&]*)";
         Pattern uPattern = Pattern.compile(urlPattern, Pattern.CASE_INSENSITIVE);
         Matcher m = uPattern.matcher(post);

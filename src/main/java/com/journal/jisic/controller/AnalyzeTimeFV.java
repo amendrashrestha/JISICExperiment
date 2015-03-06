@@ -50,14 +50,14 @@ public class AnalyzeTimeFV {
              */
             Alias mainUser = aliases.get(0);
             int user1 = mainUser.getUserID();
-            int[] mainUserFV = IOReadWrite.getUserTimeProfile(mainUser);
+            Float[] mainUserFV = IOReadWrite.getUserTimeProfile(mainUser);
 
             /**
              * Other user
              */
             Alias otherUsers = aliases.get(i);
             int user2 = otherUsers.getUserID();
-            int[] normUserFV = IOReadWrite.getUserTimeProfile(otherUsers);
+            Float[] normUserFV = IOReadWrite.getUserTimeProfile(otherUsers);
 
             timeMatch = calculateManhattanDistance(mainUserFV, normUserFV);
 
@@ -77,7 +77,7 @@ public class AnalyzeTimeFV {
      * @param sequence2
      * @return
      */
-    public double calculateManhattanDistance(int[] sequence1, int[] sequence2) {
+    public double calculateManhattanDistance(Float[] sequence1, Float[] sequence2) {
         double manhattanDistance = 0.0;
         for (int i = 0; i < sequence1.length; i++) {
             double firstElementsequence1 = sequence1[i];

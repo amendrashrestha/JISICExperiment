@@ -21,6 +21,8 @@ public class IOProperties {
 //    public static final String INDIVIDUAL_USER_FILE_PATH = "C:\\Users\\ITE\\Downloads\\2003\\UsersPostWithContent\\";
     public static final String INDIVIDUAL_USER_FILE_PATH = System.getProperty("user.home") + "/Downloads/BoardDataSet/2007/UsersPostWithContent/";
 //    public static final String INDIVIDUAL_USER_FILE_PATH = System.getProperty("user.home") + "/Downloads/WekaTestData/UsersPostTime/";
+//    public static final String INDIVIDUAL_USER_FILE_PATH = System.getProperty("user.home") + "/Downloads/BoardDataSet/2007/UsersPostTime/";
+//    public static final String INDIVIDUAL_USER_FILE_PATH = System.getProperty("user.home") + "/Downloads/BoardDataSet/TestUser/UsersPostWithContent/";
  
     /**
      * Following are the text file and text seperator for reading the data from
@@ -30,5 +32,5 @@ public class IOProperties {
     public static final String DATA_SEPERATOR = "This seperates post";
     
     public static final String SWE_FUNCTION_WORDS_PATH = System.getProperty("user.home") + "/functionWords_Swedish.txt";
-    public static final String FUNCTION_WORDS_PATH = System.getProperty("user.home") + "/functionWord/function_words.txt";
+    public static final String FUNCTION_WORDS_PATH = System.getProperty("user.home") + "/functionWords.txt";
 }

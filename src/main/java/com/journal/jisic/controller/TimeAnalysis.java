@@ -11,7 +11,7 @@ import java.util.List;
 public class TimeAnalysis {
 
     public static int[] getIntervalOfDay(List<String> postTime) {
-        int[] intervalOfDay = new int[]{0, 0, 0, 0, 0, 0};
+        int[] intervalOfDay = new int[6];
 
         for (String time : postTime) {
             String[] splitTime = time.split(":");

@@ -27,16 +27,16 @@ public class Experiment {
 
     public static void main(String args[]) throws IOException, SQLException, ParseException {
         Experiment init = new Experiment();
-        init.TimeExperiment();
+//        init.TimeExperiment();
         
-//        init.TimeStyloExperiment();
+        init.TimeStyloExperiment();
     }
 
     private void TimeExperiment() throws IOException, SQLException, ParseException {
         List<User> userList = IOReadWrite.getAllUsersAsObject();
 
         //For passing limited number of sorted users  
-        List<User> tempUsers = IOReadWrite.returnLimitedSortedUser(userList, 600);
+        List<User> tempUsers = IOReadWrite.returnLimitedSortedUser(userList, 200);
         List<Alias> splitUsersList;
         int divisionTimes;
 
@@ -60,7 +60,7 @@ public class Experiment {
         List<User> userList = IOReadWrite.getAllUsersAsObject();
 
         //For passing limited number of sorted users  
-        List<User> tempUsers = IOReadWrite.returnLimitedSortedUser(userList, 5);
+        List<User> tempUsers = IOReadWrite.returnLimitedSortedUser(userList, 10);
         List<Alias> splitUsersList;
         int divisionTimes;
 

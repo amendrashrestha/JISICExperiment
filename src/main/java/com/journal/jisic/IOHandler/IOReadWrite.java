@@ -1,5 +1,6 @@
 package com.journal.jisic.IOHandler;
 
+import com.journal.jisic.controller.StylometryAnalysis;
 import com.journal.jisic.controller.TimeAnalysis;
 import com.journal.jisic.model.Alias;
 import java.io.BufferedReader;
@@ -19,11 +20,15 @@ import java.util.Random;
 import com.journal.jisic.model.Posts;
 import com.journal.jisic.model.ReturnSortedUserList;
 import com.journal.jisic.model.User;
+import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang.StringEscapeUtils;
 
 /**
  *
@@ -283,7 +288,7 @@ public class IOReadWrite {
         return tempUsers;
     }
 
-    public static int[] getUserTimeProfile(Alias alias) throws ParseException {
+    public static Float[] getUserTimeProfile(Alias alias) throws ParseException {
 
         List<String> postTime = alias.getPostTime();
         List<String> postDate = alias.getPostDate();
@@ -292,21 +297,97 @@ public class IOReadWrite {
         int[] hourOfDay = TimeAnalysis.getHourOfDay(postTime);
         int[] monthOfYear = TimeAnalysis.getMonthOfYear(postDate);
         int[] dayOfWeek = TimeAnalysis.getDayOfWeek(postDate);
-        int[] typeOfWeek = TimeAnalysis.getTypeOfWeekEnd(postDate);
+        int[] typeOfWeekEnd = TimeAnalysis.getTypeOfWeekEnd(postDate);
 
-        hourOfDay = returnNormalizedVector(hourOfDay);
-        intervalOfDay = returnNormalizedVector(intervalOfDay);
-        monthOfYear = returnNormalizedVector(monthOfYear);
-        dayOfWeek = returnNormalizedVector(dayOfWeek);
-        typeOfWeek = returnNormalizedVector(typeOfWeek);
+        int totalSum = postTime.size();
 
-        int[] combined = ArrayUtils.addAll(hourOfDay, intervalOfDay);
-        int[] combined1 = ArrayUtils.addAll(combined, monthOfYear);
-        int[] combined2 = ArrayUtils.addAll(combined1, dayOfWeek);
-        int[] timeFeatureVectorList = ArrayUtils.addAll(combined2, typeOfWeek);
+        Float[] normHourOfDay = IOReadWrite.returnNormalizedVector(hourOfDay, totalSum);
+        Float[] normIntervalOfDay = IOReadWrite.returnNormalizedVector(intervalOfDay, totalSum);
+        Float[] normmonthOfYear = IOReadWrite.returnNormalizedVector(monthOfYear, totalSum);
+        Float[] normDayOfWeek = IOReadWrite.returnNormalizedVector(dayOfWeek, totalSum);
+        Float[] normTypeOfWeekEnd = IOReadWrite.returnNormalizedVector(typeOfWeekEnd, totalSum);
+
+        Float[] timeFeatureVectorList = IOReadWrite.concatArrays(normHourOfDay,
+                normIntervalOfDay, normmonthOfYear, normDayOfWeek, normTypeOfWeekEnd);
 
         return timeFeatureVectorList;
 
+    }
+
+    public static Float[] createPostFeatureVectorForUser(Alias alias) {
+        StylometryAnalysis stylo = new StylometryAnalysis();
+        List<String> posts = alias.getPosts();
+        int cnt = 0;
+        alias.setFeatureVectorPosList(alias.initializeFeatureVectorPostList());
+        Float[] styloFeatVector = null;
+//        int featSize = alias.getFeatureVectorPosList().get(0).size();
+//        System.out.println("UserID: " + alias.getUserID());
+
+        for (String post : posts) {
+//            System.out.println("Post -->  " + post);
+
+            String filteredPost = IOReadWrite.filterPost(post);
+
+//            System.out.println("Filtered Post: " + filteredPost);
+
+            List<String> filteredWordInPost = stylo.extractWords(filteredPost);
+//            System.out.println("Filtered Word Size: " + filteredWordInPost.size());
+
+            List<String> wordsInPost = stylo.extractWords(post);
+            int WordInPostSize = wordsInPost.size();
+//            System.out.println("NON Filtered Word Size: " + WordInPostSize);
+            int afterFWplaceInFeatureVector = 0;
+
+            ArrayList<Float> functionWord = stylo.countFunctionWords(filteredWordInPost, WordInPostSize);
+//            System.out.println("Function Words: " + functionWord);
+            afterFWplaceInFeatureVector = functionWord.size();
+//            System.out.println("Function Word: " + afterFWplaceInFeatureVector);
+            alias.addToFeatureVectorPostList(functionWord, 0, cnt);
+
+            ArrayList<Float> wordLength = stylo.countWordLengths(filteredWordInPost, WordInPostSize);
+            alias.addToFeatureVectorPostList(wordLength, afterFWplaceInFeatureVector, cnt);
+
+            int afterWLplaceInFeatureVector = afterFWplaceInFeatureVector + wordLength.size();
+//            System.out.println("Word Count: " + wordLength);
+            ArrayList<Float> character = stylo.countCharactersAZ(filteredPost, post);
+            alias.addToFeatureVectorPostList(character, afterWLplaceInFeatureVector, cnt);
+
+            int placeafterCharInFeatureVector = afterWLplaceInFeatureVector + character.size();
+//            System.out.println("Character: " + placeafterCharInFeatureVector);
+            ArrayList<Float> specialCharacter = stylo.countSpecialCharacters(filteredPost, post);
+            alias.addToFeatureVectorPostList(specialCharacter, placeafterCharInFeatureVector, cnt);
+
+            int placeafterSPCInFeatureVector = placeafterCharInFeatureVector + specialCharacter.size();
+
+//            System.out.println("Emotion Words: " + placeafterSPCInFeatureVector);
+            ArrayList<Float> smilies = stylo.countSmiley(wordsInPost, WordInPostSize);
+            alias.addToFeatureVectorPostList(smilies, placeafterSPCInFeatureVector, cnt);
+            int size = smilies.size() + placeafterSPCInFeatureVector;
+//            System.out.println("FV Size: " + size);
+
+            cnt++;
+        }
+        ArrayList<ArrayList<Float>> featureVectorList = alias.getFeatureVectorPosList();
+
+        int numberOfPosts = posts.size();
+        int nrOfFeatures = featureVectorList.get(0).size();
+
+        List<Float> featureVector = new ArrayList<>(Collections.nCopies(nrOfFeatures, 0.0f));
+
+        // Now we average over all posts to create a single feature vector for each alias
+        for (int i = 0; i < nrOfFeatures; i++) {
+            float value = 0.0f;
+            for (int j = 0; j < numberOfPosts; j++) {
+                value += featureVectorList.get(j).get(i);
+            }
+            value /= numberOfPosts; // normalizing single featureVector count wrt total post
+            featureVector.set(i, value);
+        }
+
+        styloFeatVector = new Float[featureVector.size()];
+        featureVector.toArray(styloFeatVector);
+
+        return styloFeatVector;
     }
 
     /**
@@ -316,22 +397,40 @@ public class IOReadWrite {
      * @param sum
      * @return
      */
-    public static int[] returnNormalizedVector(int[] timeVector) {
-        int total = 0;
-
-        for (int time : timeVector) {
-            total += time;
-        }
-
+    public static Float[] returnNormalizedVector(int[] timeVector, int sum) {
+        Float[] tempTimeVector = new Float[timeVector.length];
         for (int index = 0; index < timeVector.length; index++) {
-            double time = timeVector[index];
-            double perc = (double) (time / total);
+            float time = timeVector[index];
+            float perc = (float) (time / sum);
             int temp = (int) ((perc * 100) + 0.5);
-            timeVector[index] = temp;
+
+            float itemp = temp;
+            tempTimeVector[index] = itemp;
         }
-        return timeVector;
+        return tempTimeVector;
     }
-    
+
+    /**
+     * concatenate two arrays
+     *
+     * @param sources
+     * @return
+     */
+    public static Float[] concatArrays(Float[]... sources) {
+
+        int length = 0;
+        for (Float[] array : sources) {
+            length += array.length;
+        }
+        Float[] result = new Float[length];
+        int destPos = 0;
+        for (Float[] array : sources) {
+            System.arraycopy(array, 0, result, destPos, array.length);
+            destPos += array.length;
+        }
+        return result;
+    }
+
     /**
      * @Desc There are 6 category for the time {00-04} which is given a number 0
      * {04-08} which is given a number 1 {08-12} which is given a number 2
@@ -408,8 +507,8 @@ public class IOReadWrite {
         } else {
             return 1;
         }
-    }   
-        
+    }
+
     public static int getMonth(String date) throws ParseException {
         Calendar c = Calendar.getInstance();
         SimpleDateFormat format1 = new SimpleDateFormat("yyyy-MM-dd");
@@ -418,4 +517,30 @@ public class IOReadWrite {
         int monthOfYear = c.get(Calendar.MONTH);
         return monthOfYear;
     }
+
+    public static String filterPost(String post) {
+
+        String urlPattern = "((https?|ftp|gopher|telnet|file|Unsure|http):((//)|"
+                + "(\\\\))+[\\w\\d:#@%/;$()~_?\\+-=\\\\\\.&]*)";
+        Pattern uPattern = Pattern.compile(urlPattern, Pattern.CASE_INSENSITIVE);
+        Matcher m = uPattern.matcher(post);
+//        System.out.println("Main: " + tweet);
+
+        while (m.find()) {
+            String urlStr = m.group();
+            post = post.replaceAll(Pattern.quote(urlStr), "").trim();
+        }
+
+//        System.out.println("Tweet After Filter: " + tweet + "\n");
+        /**
+         * convert HTML unicode
+         */
+        post = StringEscapeUtils.unescapeHtml(post);
+
+        post = post.replaceAll("\\<[^>]*>", "");
+
+//        System.out.println("Real Tweet: " + tweet);
+        return post;
+    }
+    
 }

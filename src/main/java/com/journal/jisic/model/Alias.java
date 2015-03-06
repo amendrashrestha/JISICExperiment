@@ -12,7 +12,6 @@ public class Alias {
 
     private List<Float> featureVector;
     private int nrOfFeatures;
-    private int nrOfSwedishFeatures;
     private int user;
     private String type;
     private ArrayList<ArrayList<Float>> featureVectorPostList;
@@ -28,9 +27,7 @@ public class Alias {
     }
 
     public Alias() {
-        setNrOfFeatures(361); //english feature vector size
-        setNrOfSwedishFeatures(456); //swedish feature vector size
-        
+        setNrOfFeatures(374); //english feature vector size      
     }
 
 
@@ -39,18 +36,6 @@ public class Alias {
         for (int j = 0; j < posts.size(); j++) {
             ArrayList<Float> featList = new ArrayList<Float>();
             for (int i = 0; i < nrOfFeatures; i++) {
-                featList.add(0.0f);
-            }
-            list.add(featList);
-        }
-        return list;
-    }
-    
-    public ArrayList<ArrayList<Float>> initializeFeatureVectorPostListForSwe() {
-        ArrayList<ArrayList<Float>> list = new ArrayList<ArrayList<Float>>();
-        for (int j = 0; j < posts.size(); j++) {
-            ArrayList<Float> featList = new ArrayList<Float>();
-            for (int i = 0; i < nrOfSwedishFeatures; i++) {
                 featList.add(0.0f);
             }
             list.add(featList);
@@ -149,19 +134,5 @@ public class Alias {
 
     public List getPostDate() {
         return postDate;
-    }
-
-    /**
-     * @return the nrOfSwedishFeatures
-     */
-    public int getNrOfSwedishFeatures() {
-        return nrOfSwedishFeatures;
-    }
-
-    /**
-     * @param nrOfSwedishFeatures the nrOfSwedishFeatures to set
-     */
-    private void setNrOfSwedishFeatures(int nrOfSwedishFeatures) {
-        this.nrOfSwedishFeatures = nrOfSwedishFeatures;
     }
 }

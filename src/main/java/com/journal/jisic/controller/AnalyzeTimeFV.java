@@ -20,7 +20,7 @@ import java.util.Set;
  */
 public class AnalyzeTimeFV {
 
-    public List<Alias> aliases; // The aliases we are interested in to compare
+//    public List<Alias> aliases; // The aliases we are interested in to compare
     List tempDisplayInfo;
     List<Integer> rank = new ArrayList<>();
     int rankArray[] = {0, 0, 0, 0};
@@ -30,12 +30,11 @@ public class AnalyzeTimeFV {
     Set userBin = new HashSet();
 
     public void executeUserCompare(List<Alias> aliasList) throws SQLException, ParseException {
-        this.aliases = aliasList;
-        compareAllPairsOfAliases();
+        compareAllPairsOfAliases(aliasList);
         displayUserRank();
     }
 
-    public void compareAllPairsOfAliases() throws SQLException, ParseException {
+    public void compareAllPairsOfAliases(List<Alias> aliases) throws SQLException, ParseException {
         tempDisplayInfo = new ArrayList<>();
 
         for (int i = 1; i < aliases.size(); i++) {

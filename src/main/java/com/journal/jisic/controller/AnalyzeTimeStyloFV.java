@@ -153,7 +153,7 @@ List tempDisplayInfo;
             }
         });
         Collections.reverse(tempinfo);
-        System.out.println("After sorting: " + tempinfo);
+//        System.out.println("After sorting: " + tempinfo);
         createRank(tempinfo);
     }
 

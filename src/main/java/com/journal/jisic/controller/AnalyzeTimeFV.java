@@ -59,7 +59,7 @@ public class AnalyzeTimeFV {
             int user2 = otherUsers.getUserID();
             Float[] normUserFV = IOReadWrite.getUserTimeProfile(otherUsers);
 
-            timeMatch = calculateManhattanDistance(mainUserFV, normUserFV);
+            timeMatch = calculateSimilarity(mainUserFV, normUserFV);
 
             tempList.add(user1);
             tempList.add(user2);
@@ -90,6 +90,39 @@ public class AnalyzeTimeFV {
         }
         return manhattanDistance;
     }
+    
+    /**
+     * Calculates cosine similarity between two real vectors
+     *
+     * @param value1
+     * @param value2
+     * @return
+     */
+    public double calculateSimilarity(Float[] value1, Float[] value2) {
+        float sum = 0.0f;
+        float sum1 = 0.0f;
+        float sum2 = 0.0f;
+        for (int i = 0; i < value1.length; i++) {
+            float v1 = value1[i];
+            float v2 = value2[i];
+            if ((!Float.isNaN(v1)) && (!Float.isNaN(v2))) {
+                sum += v2 * v1;
+                sum1 += v1 * v1;
+                sum2 += v2 * v2;
+            }
+        }
+        if ((sum1 > 0) && (sum2 > 0)) {
+            double result = sum / (Math.sqrt(sum1) * Math.sqrt(sum2));
+            // result can be > 1 (or -1) due to rounding errors for equal vectors, 
+            //but must be between -1 and 1
+            return Math.min(Math.max(result, -1d), 1d);
+            //return result;
+        } else if (sum1 == 0 && sum2 == 0) {
+            return 1d;
+        } else {
+            return 0d;
+        }
+    }
 
     /**
      * sort list of time
@@ -111,6 +144,7 @@ public class AnalyzeTimeFV {
             }
         });
         //System.out.println("After sorting: " + tempTimeinfo);
+        Collections.reverse(tempTimeinfo);
         createRank(tempTimeinfo);
     }
 
